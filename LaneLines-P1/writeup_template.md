@@ -23,9 +23,20 @@ The goals / steps of this project are the following:
 
 ###1. Describe your pipeline. As part of the description, explain how you modified the draw_lines() function.
 
-My pipeline consisted of 5 steps. First, I converted the images to grayscale, then I .... 
+My pipeline consisted of 5 steps. 
+* First, I converted the images to grayscale 
+* applied Guassian smoothing with kernel size 5 
+* used Canny Edge Detection with min and max thresholds of 80 and 130 
+* identified region of interest (part of image where you expect to find Lane Lines) 
+* finally used Hough Transform Line Detection to identify Lanes and draw them on top of input image
 
-In order to draw a single line on the left and right lanes, I modified the draw_lines() function by ...
+In order to draw a single line on the left and right lanes, I modified the draw_lines() function by following
+* Categorized all input lines into positive slope lines and negative slope lines
+* Identified and removed outlier slopes from both positive and negative slope lines
+* Used numpy polyfit to identify one line each for all positive slope points and negative slope points
+* Identify closest (close to camera) points for both positive and negative slope lines
+* Identify farthest points for each side and if its less than a given fixed distance then extrapolate
+* finally with closest and farther points for each side draw exactly two lines on to image identifying lanes
 
 If you'd like to include images to show how the pipeline works, here is how to include an image: 
 
@@ -35,13 +46,13 @@ If you'd like to include images to show how the pipeline works, here is how to i
 ###2. Identify potential shortcomings with your current pipeline
 
 
-One potential shortcoming would be what would happen when ... 
+One potential shortcoming is this approach fails when we have exact vertical lanes in picture, entering a curve (at this point lanes will not be straight line but an arc) 
 
-Another shortcoming could be ...
+Another shortcoming could be our region of interest in Image. during lane change, our region of interest might capture only one line
 
 
 ###3. Suggest possible improvements to your pipeline
 
-A possible improvement would be to ...
+A possible improvement would be to skip processing every image in video and use info calculated in previous image since Lane lines will not have sharp edges. This will help in cases when we suddenly cannot identify lane lines due to sun reflection/mud on road etc.
 
-Another potential improvement could be to ...
+Another potential improvement could be to somehow identify curver during turnings and follow along
