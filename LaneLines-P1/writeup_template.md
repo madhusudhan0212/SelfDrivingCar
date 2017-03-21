@@ -16,6 +16,7 @@ The goals / steps of this project are the following:
 [//]: # (Image References)
 
 [image1]: ./examples/grayscale.jpg "Grayscale"
+[image2]: ./examples/Pipeline_Explanation.jpg "Pipeline Images"
 
 ---
 
@@ -38,9 +39,9 @@ In order to draw a single line on the left and right lanes, I modified the draw_
 * Identify farthest points for each side and if its less than a given fixed distance then extrapolate
 * finally with closest and farther points for each side draw exactly two lines on to image identifying lanes
 
-If you'd like to include images to show how the pipeline works, here is how to include an image: 
+In below image, you can see the modifications done at each step of pipeline
 
-![alt text][image1]
+![alt text][image2]
 
 
 ###2. Identify potential shortcomings with your current pipeline
