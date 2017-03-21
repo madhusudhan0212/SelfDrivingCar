@@ -47,13 +47,16 @@ In below image, you can see the modifications done at each step of pipeline
 ###2. Identify potential shortcomings with your current pipeline
 
 
-One potential shortcoming is this approach fails when we have exact vertical lanes in picture, entering a curve (at this point lanes will not be straight line but an arc) 
+One potential shortcoming with this approach is it fails
+* to identify lane lines in snow, rain, sun reflections. 
+* have exact vertical lanes in picture 
+* entering a curve (at this point lanes will not be straight line but an arc) 
 
-Another shortcoming could be our region of interest in Image. during lane change, our region of interest might capture only one line
+Another shortcoming could be our region of interest in Image. Lane Lines may not always be present in our region of interest.
 
 
 ###3. Suggest possible improvements to your pipeline
 
-A possible improvement would be to skip processing every image in video and use info calculated in previous image since Lane lines will not have sharp edges. This will help in cases when we suddenly cannot identify lane lines due to sun reflection/mud on road etc.
+A possible improvement would be to skip processing every single image in video and use info calculated from previous image since Lane lines will not have sharp edges. This will help in cases when we suddenly cannot identify lane lines due to sun reflection/mud on road, dashed lines are too far apart etc.
 
-Another potential improvement could be to somehow identify curver during turnings and follow along
+Another potential improvement could be to follow vehicles in front at safe distance when view is not clear
