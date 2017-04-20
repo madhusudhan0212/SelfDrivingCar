@@ -22,11 +22,11 @@ The goals / steps of this project are the following:
 [image1]: ./dataAnalysis/exploratoryAnalysis.png "Visualization"
 [image2]: ./dataAnalysis/dataAugumentation.jpg "Various Data Augumentations"
 [image3]: ./dataAnalysis/traindataaugumented.png "Final data distribution"
-[image4]: ./downloadedImages/SpeedLimit30.png "Traffic Sign 2"
-[image5]: ./downloadedImages/SpeedLimit50.png "Traffic Sign 3"
-[image6]: ./downloadedImages/SpeedLimit60.png "Traffic Sign 4"
-[image7]: ./downloadedImages/SpeedLimit80.png "Traffic Sign 5"
-[image8]: ./downloadedImages/stop.png "Traffic Sign 5"
+[image4]: ./downloadedImages/SpeedLimit30.jpeg "Traffic Sign 2"
+[image5]: ./downloadedImages/SpeedLimit50.jpeg "Traffic Sign 3"
+[image6]: ./downloadedImages/SpeedLimit60.jpeg "Traffic Sign 4"
+[image7]: ./downloadedImages/SpeedLimit80.jpeg "Traffic Sign 5"
+[image8]: ./downloadedImages/stop.jpeg "Traffic Sign 5"
 
 ## Rubric Points
 ###Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/481/view) individually and describe how I addressed each point in my implementation.  
