@@ -80,7 +80,7 @@ Here is the distribution of training labels after data augumentation
 
 ![alt text][image3]
 
-The original data set had 34799 images and the augmented data set had 374004 images.
+The original data set had 34799 images and the augmented data set had 373848 images.
 
 
 ####2. Final model architecture
@@ -117,9 +117,9 @@ To train the model, I used an AdamOptimizer with batch size of 128 and 20 epochs
 I have started with Lenet architecture. since accuracy was low i went deep and added additional conv layer. To go further deep, i changed the depth of each conv layer to increasingly progressive to capture more image features. I also used max pooling after each conv layer to reduce the features instead of larger conv strides or valid padding as both of those are aggresive ways for feature reduction. I introduced dropout with pkeep of 75% in fully connected layer for regularization.I also increased the depth of output layer to account for increased output labels. I also used decaying learning rate which improved my acccuracy.
 
 My final model results were:
-* training set accuracy of ?
-* validation set accuracy of 97.21
-* test set accuracy of 95.52
+* training set accuracy of 99.99
+* validation set accuracy of 97.78
+* test set accuracy of 95.91
 
 
 ###Test a Model on New Images
