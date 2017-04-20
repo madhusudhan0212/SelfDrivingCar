@@ -23,9 +23,9 @@ The goals / steps of this project are the following:
 [image2]: ./dataAnalysis/dataAugumentation.jpg "Various Data Augumentations"
 [image3]: ./dataAnalysis/traindataaugumented.png "Final data distribution"
 [image4]: ./downloadedImages/SpeedLimit30.jpeg "Traffic Sign 2"
-[image5]: ./downloadedImages/SpeedLimit50.jpeg "Traffic Sign 3"
+[image5]: ./downloadedImages/speedLimit50.jpeg "Traffic Sign 3"
 [image6]: ./downloadedImages/SpeedLimit60.jpeg "Traffic Sign 4"
-[image7]: ./downloadedImages/SpeedLimit80.jpeg "Traffic Sign 5"
+[image7]: ./downloadedImages/speedLimit80.jpeg "Traffic Sign 5"
 [image8]: ./downloadedImages/stop.jpeg "Traffic Sign 5"
 
 ## Rubric Points
