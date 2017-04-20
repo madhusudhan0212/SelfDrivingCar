@@ -1,9 +1,5 @@
 #**Traffic Sign Recognition** 
 
-##Writeup Template
-
-###You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
-
 ---
 
 **Build a Traffic Sign Recognition Project**
@@ -20,7 +16,7 @@ The goals / steps of this project are the following:
 [//]: # (Image References)
 
 [image1]: ./dataAnalysis/exploratoryAnalysis.png "Visualization"
-[image2]: ./dataAnalysis/dataAugumentation.jpg "Various Data Augumentations"
+[image2]: ./dataAnalysis/dataAugumentation1.jpg "Various Data Augumentations"
 [image3]: ./dataAnalysis/traindataaugumented.png "Final data distribution"
 [image4]: ./downloadedImages/SpeedLimit30.jpg "Traffic Sign 2"
 [image5]: ./downloadedImages/speedLimit50.jpeg "Traffic Sign 3"
@@ -34,13 +30,11 @@ The goals / steps of this project are the following:
 ---
 ###Writeup / README
 
-####1. Provide a Writeup / README that includes all the rubric points and how you addressed each one. You can submit your writeup as markdown or pdf. You can use this template as a guide for writing the report. The submission includes the project code.
-
 You're reading it! and here is a link to my [project code](https://github.com/udacity/CarND-Traffic-Sign-Classifier-Project/blob/master/Traffic_Sign_Classifier.ipynb)
 
 ###Data Set Summary & Exploration
 
-####1. Provide a basic summary of the data set. In the code, the analysis should be done using python, numpy and/or pandas methods rather than hardcoding results manually.
+####1. Basic summary of the data set.
 
 I used the pandas library to calculate summary statistics of the traffic
 signs data set:
@@ -51,15 +45,15 @@ signs data set:
 * The shape of a traffic sign image is (32, 32, 3)
 * The number of unique classes/labels in the data set is 43
 
-####2. Include an exploratory visualization of the dataset.
+####2. Exploratory visualization of the dataset.
 
-Here is an exploratory visualization of the data set. It is a bar chart showing the training/valid/test distribution of output labels.
+Here is an exploratory visualization of the data set. It is a bar chart showing the training/valid/test set distribution of output labels. The output labels are on x-axis and their counts are on y-axis
 
 ![alt text][image1]
 
 ###Design and Test a Model Architecture
 
-####1. Describe how you preprocessed the image data. 
+####1. Image data preprocessing. 
 
 * As first step, I have identified and removed blank images from training data.
 * As the initial training data was very less, i have generated additional data
@@ -114,17 +108,17 @@ To train the model, I used an AdamOptimizer with batch size of 128 and 20 epochs
 
 ####4. Approach taken for finding a solution and getting the validation set accuracy to be at least 0.93. 
 
-I have started with Lenet architecture. since accuracy was low i went deep and added additional conv layer. To go further deep, i changed the depth of each conv layer to increasingly progressive to capture more image features. I also used max pooling after each conv layer to reduce the features instead of larger conv strides or valid padding as both of those are aggresive ways for feature reduction. I introduced dropout with pkeep of 75% in fully connected layer for regularization.I also increased the depth of output layer to account for increased output labels. I also used decaying learning rate which improved my acccuracy.
+I have started with Lenet architecture. since accuracy was low i went deep and added additional conv layer. To go further deep, i changed the depth of each conv layer to increasingly progressive to capture more image features. I also used max pooling after each conv layer to reduce the features instead of larger conv strides or valid padding as both of those methods are aggresive ways for feature reduction. I introduced dropout with pkeep of 75% in fully connected layer for regularization. I increased the depth of output layer to account for increased output labels and used decaying learning rate which improved my acccuracy.
 
 My final model results were:
-* training set accuracy of 99.99
-* validation set accuracy of 97.78
-* test set accuracy of 95.91
+* training set accuracy of 99.99 %
+* validation set accuracy of 97.78 %
+* test set accuracy of 95.91 %
 
 
 ###Test a Model on New Images
 
-####1. Choose five German traffic signs found on the web and provide them in the report. For each image, discuss what quality or qualities might be difficult to classify.
+####1. I have downloaded five German traffic signs found on the web and tried to classify below. For each image, I discuss what was model's prediction.
 
 Here are five German traffic signs that I found on the web:
 
@@ -133,75 +127,75 @@ Here are five German traffic signs that I found on the web:
 
 The second image might be difficult to classify because its not positioned center and is small towards one side of image. all other images must be easy to classify.
 
-####2. Discuss the model's predictions on these new traffic signs and compare the results to predicting on the test set. At a minimum, discuss what the predictions were, the accuracy on these new predictions, and compare the accuracy to the accuracy on the test set (OPTIONAL: Discuss the results in more detail as described in the "Stand Out Suggestions" part of the rubric).
+####2. Model's predictions on these new traffic signs
 
 Here are the results of the prediction:
 
 | Image			        |     Prediction	        					| 
-|:---------------------:|:---------------------------------------------:| 
-| Stop Sign      		| Stop sign   									| 
-| Speed Limit 30    	| U-turn 										|
-| Speed Limit 50		| Yield											|
-| Speed Limit 60	    | Bumpy Road					 				|
-| Speed Limit 80		| Slippery Road      							|
+|:---------------------:|:---------------------------------------------:|  
+| Speed limit (30km/h)  | Speed limit (30km/h) 							|
+| Speed limit (50km/h)	| Roundabout mandatory							|
+| Speed limit (60km/h)	| Speed limit (60km/h)			 				|
+| Speed limit (80km/h)	| Speed limit (80km/h) 							|
+| Stop      			| Stop   										|
 
 
-The model was able to correctly guess 4 of the 5 traffic signs, which gives an accuracy of 80%. This compares favorably to the accuracy on the test set of ...
+The model was able to correctly guess 4 of the 5 traffic signs, which gives an accuracy of 80%. This compares favorably to the accuracy on the test set of 95.9%
 
-####3. Describe how certain the model is when predicting on each of the five new images by looking at the softmax probabilities for each prediction. Provide the top 5 softmax probabilities for each image along with the sign type of each probability. (OPTIONAL: as described in the "Stand Out Suggestions" part of the rubric, visualizations can also be provided such as bar charts)
+####3. Model Predictions analysis
 
-The code for making predictions on my final model is located in the 11th cell of the Ipython notebook.
+The code for making predictions on my final model is located in the 45th cell of the Ipython notebook.
 
-For the first image, the model is relatively sure that this is a stop sign (probability of 0.6), and the image does contain a stop sign. The top five soft max probabilities were
-
-| Probability         	|     Prediction	        					| 
-|:---------------------:|:---------------------------------------------:| 
-| .60         			| Stop sign   									| 
-| .20     				| U-turn 										|
-| .05					| Yield											|
-| .04	      			| Bumpy Road					 				|
-| .01				    | Slippery Road      							|
-
-
-For the second image ... 
+For the first image, the model is very sure that this is a Speed limit (30km/h) (probability of 0.999), and the image does contain a Speed limit (30km/h) sign. The top five soft max probabilities were
 
 | Probability         	|     Prediction	        					| 
 |:---------------------:|:---------------------------------------------:| 
-| .60         			| Stop sign   									| 
-| .20     				| U-turn 										|
-| .05					| Yield											|
-| .04	      			| Bumpy Road					 				|
-| .01				    | Slippery Road      							|
+| .999         			| Speed limit (30km/h)   						| 
+| .00     				| Speed limit (80km/h) 							|
+| .00					| Speed limit (20km/h)							|
+| .00	      			| Speed limit (50km/h)					 		|
+| .00				    | Speed limit (100km/h)      					|
 
-For the third image ... 
 
-| Probability         	|     Prediction	        					| 
-|:---------------------:|:---------------------------------------------:| 
-| .60         			| Stop sign   									| 
-| .20     				| U-turn 										|
-| .05					| Yield											|
-| .04	      			| Bumpy Road					 				|
-| .01				    | Slippery Road      							|
-
-For the fourth image ... 
+For the second image the model predicted the sign as Roundabout Mandatory instead of Speed limit (50km/h) sign. As mentioned earlier, this image was difficult to predict as sign symbol was very small and towards one corner of image. The top five soft max probabilities were
 
 | Probability         	|     Prediction	        					| 
 |:---------------------:|:---------------------------------------------:| 
-| .60         			| Stop sign   									| 
-| .20     				| U-turn 										|
-| .05					| Yield											|
-| .04	      			| Bumpy Road					 				|
-| .01				    | Slippery Road      							|
+| .95         			| Roundabout mandatory   						| 
+| .04     				| Priority road 								|
+| .00					| Keep right									|
+| .00	      			| Speed limit (60km/h)			 				|
+| .00				    | No entry      								|
 
-For the fifth image ... 
+For the third image, the model is sure that this is a Speed limit (60km/h) (probability of 0.92), and the image does contain a Speed limit (60km/h) sign. The top five soft max probabilities were 
 
 | Probability         	|     Prediction	        					| 
 |:---------------------:|:---------------------------------------------:| 
-| .60         			| Stop sign   									| 
-| .20     				| U-turn 										|
-| .05					| Yield											|
-| .04	      			| Bumpy Road					 				|
-| .01				    | Slippery Road      							|
+| .92         			| Speed limit (60km/h)   						| 
+| .06     				| Speed limit (50km/h) 							|
+| .006					| Bicycles crossing								|
+| .004	      			| Turn left ahead					 			|
+| .001				    | Children crossing      						|
+
+For the fourth image, the model is very sure that this is a Speed limit (80km/h) (probability of 0.988), and the image does contain a Speed limit (80km/h) sign. The top five soft max probabilities were 
+
+| Probability         	|     Prediction	        					| 
+|:---------------------:|:---------------------------------------------:| 
+| .988         			| Speed limit (80km/h)   						| 
+| .006     				| Speed limit (100km/h) 						|
+| .005					| Speed limit (60km/h)							|
+| .00	      			| Speed limit (120km/h)					 		|
+| .00				    | Speed limit (50km/h)      					|
+
+For the fifth image, the model is very sure that this is a Stop sign (probability of 0.999), and the image does contain a Stop sign. The top five soft max probabilities were
+
+| Probability         	|     Prediction	        					| 
+|:---------------------:|:---------------------------------------------:| 
+| .999         			| Stop   								   		| 
+| .00     				| No entry 										|
+| .00					| No passing									|
+| .00	      			| Speed limit (70km/h)					 		|
+| .00				    | Speed limit (50km/h)      					|
 
 
 
