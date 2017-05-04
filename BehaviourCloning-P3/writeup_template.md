@@ -114,7 +114,7 @@ Then I used two data augumentation methods to create additional training data.
 below is the image with data augumentation
 
 
-![alt text][image2]
+![alt text][image1]
 
 
 My actual data points collected from driving was 6477. After above Data augumentations, I had 79860 number of data points. 
