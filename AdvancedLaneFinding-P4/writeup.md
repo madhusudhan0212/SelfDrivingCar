@@ -100,17 +100,20 @@ I verified that my perspective transform was working as expected by drawing a te
 
 #### 4. Identify lane-line pixels
 
-Then I did some other stuff and fit my lane lines with a 2nd order polynomial kinda like this:
+I did this in functions `get_pixelpositions_withSlidigWindow()` and `get_pixelpositions_withPreviousLinefits()` in lines 244 through 327 in my code in `AdvancedLaneFinding.py`. The first method used sliding windows approach to identify lane lines. The second method takes in previous frame's predicted lines and narrows its search area to find lane lines in new frame. Both functions return identify and return current image's x and y pixel positions of left and right lane.
+The pixel points are then used to fit lane lines with 2nd order polynomial. Below image shows the sliding window approach used and lane lines pixels identified and fit lines
 
 ![alt text][image6]
 
 #### 5. Radius of curvature of the lane and the position of the vehicle with respect to center.
 
-I did this in function `get_curve_offset()` in lines 348 through 375 in my code in `AdvancedLaneFinding.py`
+I did this in function `get_curve_offset()` in lines 348 through 375 in my code in `AdvancedLaneFinding.py`. To identify vehicl position with respect to center, I calculated lane center and image center in meters and did subraction. For radius curvature, i identified the curvature for both left and right lanes and used minimum of both to display on output image.
 
 #### 6. final output
 
-I implemented this step in function `draw_output_image()` in lines 383 through 407 in my code in `AdvancedLaneFinding.py`.  Here is an example of my result on a test image:
+I implemented this step in function `draw_output_image()` in lines 383 through 407 in my code in `AdvancedLaneFinding.py`.  In this step, i warped the detected lane boundaries back onto the original image and added position and curvature strings back onto original image
+
+Here is an example of my result on a test image:
 
 ![alt text][image7]
 
@@ -126,6 +129,9 @@ Here's a [link to my video result](./data/output_videos/project_video.mp4)
 
 ### Discussion
 
-#### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
-
 Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+
+* Initially my pipeline found it difficult to identify lane lines under bright light. But the issue got fixed when I included Gradient Filtering on S channel into my pipeline
+* you can notice it in pipeline images. The gradient threshold images of Gray scale image result almost blank images and lane lines were identified from S channel images
+* The pipeline has major dependency on region of interest to identify lanes. The pipeline will fail if region of interest doesnt contain lane line. ( sharp turns, during lane changes, not so clean lane lines)
+* Few improvements to make pipeline more robust is to remember several previous predictions and use an average to have smooth predictions.
