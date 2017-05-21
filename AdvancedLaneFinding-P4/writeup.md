@@ -32,7 +32,7 @@ The goals / steps of this project are the following:
 
 ### Camera Calibration
 
-The code for this step is contained in lines 14 through 32 of the file called `AdvancedLaneFinding.py`).  
+The code for this step is contained in lines 14 through 32 of the file called `AdvancedLaneFinding.py`.  
 
 I start by preparing "object points", which will be the (x, y, z) coordinates of the chessboard corners in the world. Here I am assuming the chessboard is fixed on the (x, y) plane at z=0, such that the object points are the same for each calibration image.  Thus, `objp` is just a replicated array of coordinates, and `objpoints` will be appended with a copy of it every time I successfully detect all chessboard corners in a test image.  `imgpoints` will be appended with the (x, y) pixel position of each of the corners in the image plane with each successful chessboard detection.  
 
@@ -42,7 +42,7 @@ I then used the output `objpoints` and `imgpoints` to compute the camera calibra
 
 ### Pipeline 
 
-#### 1. example of a distortion-corrected image.
+#### 1. example of a test image and its distortion-corrected image.
 
 ![alt text][image2]
 
@@ -67,22 +67,22 @@ The final Binary image will look like this
 
 #### 3. Perspective Transform
 
-The code for my perspective transform includes a function called `perspective_transoform()`, which appears in lines 127 through 152 in the file `AdvancedLaneFinding.py`.  The `perspective_transoform()` function takes as inputs an image and gives warped output.   I chose the hardcode the source and destination points in the following manner:
+The code for my perspective transform includes a function called `perspective_transoform()`, which appears in lines 127 through 152 in the file `AdvancedLaneFinding.py`.  The `perspective_transoform()` function takes as inputs an image and gives warped output.   I chose to hardcode the source and destination points in the following manner:
 
 ```python
-	img_height = image.shape[0]
- 	img_width = image.shape[1]
-    img_size = (image.shape[1], image.shape[0])
+img_height = image.shape[0]
+img_width = image.shape[1]
+img_size = (image.shape[1], image.shape[0])
 
-    offset = np.int(img_height * 0.075)
-    src = np.float32([[np.int(img_width * 0.10 ),np.int(img_height * 0.90)],
+offset = np.int(img_height * 0.075)
+src = np.float32([[np.int(img_width * 0.10 ),np.int(img_height * 0.90)],
                     [np.int(img_width * 0.40 ),np.int(img_height * 0.65 )],
                     [np.int(img_width * 0.60 ),np.int(img_height * 0.65 )],
                     [ np.int(img_width * 0.90 ),np.int(img_height * 0.90)]])
-    dst = np.float32([ [offset, img_size[1]-offset],
-    					[offset, offset], 
-    					[img_size[0]-offset, offset],
-                        [img_size[0]-offset, img_size[1]-offset]])
+dst = np.float32([[offset, img_size[1]-offset],
+    			[offset, offset], 
+    			[img_size[0]-offset, offset],
+                [img_size[0]-offset, img_size[1]-offset]])
 ```
 
 This resulted in the following source and destination points:
