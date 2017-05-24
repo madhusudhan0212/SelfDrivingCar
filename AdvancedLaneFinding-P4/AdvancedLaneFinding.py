@@ -32,12 +32,10 @@ def calibrateCameraWithImages(Images):
     return mtx, dist
 
 
-
 #Returns an undistored Image given a camera image, camera matrix, distortion coefficients
 def cal_undistort(img, mtx, dist):    
     undist = cv2.undistort(img,mtx,dist,None,mtx)
     return undist
-
 
 
 #vizualize a sample camera image and its undistored image
@@ -52,7 +50,6 @@ def viz_camera_calib(mtx, dist):
     ax2.imshow(undistorted)
     ax2.set_title('Undistorted Image', fontsize=50)
     plt.subplots_adjust(left=0., right=1, top=0.9, bottom=0.)
-
 
 
 #Sobel Gradient Filtering
@@ -73,7 +70,6 @@ def sobel_thres(src,orient = 'x',thres = (50,120),color_channel='GRAY',kernel=3)
     return sobel_binary
 
 
-
 #Sobel Gradient filtering on combined x and y axis
 # combines X and Y axis sobel gradients and then perfomrs threshold filtering
 def sobel_thres_magnitude(src,thres = (50,120),color_channle='GRAY',kernel=3):   
@@ -91,8 +87,6 @@ def sobel_thres_magnitude(src,thres = (50,120),color_channle='GRAY',kernel=3):
     return sobel_binary
     
 
-
-
 #Converts given image to HLS channel 
 #chooses the channel passed and performs color filtering on threshold values passed
 def color_spaces(src,color_space = 'S',thres=(150,255)):
@@ -109,16 +103,55 @@ def color_spaces(src,color_space = 'S',thres=(150,255)):
     return color_binary
 
 
+def sobel_thres_gray(src):
+    sobel = cv2.Sobel(src,cv2.CV_64F,1,0,ksize=5)
+    sobel_abs = np.absolute(sobel)
+    sobel_scaled = np.uint8(sobel_abs * 255 / np.max(sobel_abs))
+    return sobel_scaled
+
+
+#Converts given image to given color space channel 
+#chooses the channel passed and performs color filtering on threshold values passed
+def color_spaces(src,color_space = 'RGB',thres=(150,255)):
+
+    if color_space == 'HLS':
+        i = 0  
+        color_channel = cv2.cvtColor(src,cv2.COLOR_RGB2HLS)
+        sub_img = color_channel[:,:,i]
+    elif color_space == 'YUV':
+        i = 2
+        color_channel = cv2.cvtColor(src,cv2.COLOR_RGB2YUV)
+        sub_img = color_channel[:,:,i]
+    elif color_space == 'LUV':
+        i = 0 
+        color_channel = cv2.cvtColor(src,cv2.COLOR_RGB2LUV)
+        sub_img = color_channel[:,:,i]
+        sub_img = sobel_thres_gray(sub_img)
+    elif color_space == 'LAB':
+        i = 2 
+        color_channel = cv2.cvtColor(src,cv2.COLOR_RGB2LAB)
+        sub_img = color_channel[:,:,i]
+    else:
+        i = 0
+        color_channel = cv2.cvtColor(src,channel)
+        sub_img = color_channel[:,:,i]
+        sub_img = sobel_thres_gray(sub_img)
+
+
+    output_image = np.zeros_like(sub_img)
+    output_image[(sub_img > thres[0]) & (sub_img <= thres[1])] = 1
+    return output_image
+
 
 #for a given image, it returns the image with only region of interest displayed
 # for viszualization purpose
 def region_of_interest(image):
     img_height = image.shape[0]
     img_width = image.shape[1]
-    vertices = np.array([[(np.int(img_width * 0.10 ),np.int(img_height * 0.90)),
+    vertices = np.array([[(np.int(img_width * 0.10 ),np.int(img_height * 0.93)),
                     (np.int(img_width * 0.40 ),np.int(img_height * 0.65 )),
                     (np.int(img_width * 0.60 ),np.int(img_height * 0.65 )),
-                    (np.int(img_width * 0.90 ),np.int(img_height * 0.90))]],dtype=np.int32)
+                    (np.int(img_width * 0.90 ),np.int(img_height * 0.93))]],dtype=np.int32)
     mask = np.zeros_like(image)       
     if len(image.shape) > 2:
         channel_count = image.shape[2]  # i.e. 3 or 4 depending on your image
@@ -130,7 +163,6 @@ def region_of_interest(image):
     return masked_image
 
 
-
 # for a given image, it identifies the region of interest and transforms its perspective to birds-eye view
 # this will avoid front view distortion issues of lane lines
 # the function also returns Minv to get back the original image if needed later
@@ -140,10 +172,10 @@ def perspective_transoform(image):
     img_size = (image.shape[1], image.shape[0])
     #print(image.shape)
     offset = np.int(img_height * 0.075)
-    src = np.float32([[np.int(img_width * 0.10 ),np.int(img_height * 0.90)],
+    src = np.float32([[np.int(img_width * 0.10 ),np.int(img_height * 0.97)],
                     [np.int(img_width * 0.40 ),np.int(img_height * 0.65 )],
                     [np.int(img_width * 0.60 ),np.int(img_height * 0.65 )],
-                    [ np.int(img_width * 0.90 ),np.int(img_height * 0.90)]])
+                    [ np.int(img_width * 0.90 ),np.int(img_height * 0.97)]])
     dst = np.float32([ [offset, img_size[1]-offset],[offset, offset], [img_size[0]-offset, offset],
                                      [img_size[0]-offset, img_size[1]-offset]])
     M = cv2.getPerspectiveTransform(src, dst)
@@ -152,6 +184,57 @@ def perspective_transoform(image):
     return warped,Minv
     
 
+
+#Identifies white color in Region of Interest of the input frame.
+#Expectation is to identify white lane lines
+def white_filter(image,thres=200):
+    
+    color_threshold = [thres, thres, thres]
+    color_filter = (image[:,:,0] < color_threshold[0]) | (image[:,:,1] < color_threshold[1]) | (image[:,:,2] < color_threshold[2])
+    white = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+    white[color_filter] = 0
+    white[~color_filter] = 1
+    return region_of_interest(white)
+
+# Applies Sobel gradient in X-axis direction for a given single color image
+def sobel_thres_gray(src):
+    sobel = cv2.Sobel(src,cv2.CV_64F,1,0,ksize=5)
+    sobel_abs = np.absolute(sobel)
+    sobel_scaled = np.uint8(sobel_abs * 255 / np.max(sobel_abs))
+    return sobel_scaled
+
+
+#Converts given image to given color space channel 
+#chooses the channel passed and performs color filtering on threshold values passed
+def color_spaces(src,color_space = 'RGB',thres=(150,255)):
+
+    if color_space == 'HLS':
+        i = 2  
+        color_channel = cv2.cvtColor(src,cv2.COLOR_RGB2HLS)
+        sub_img = color_channel[:,:,i]
+    elif color_space == 'YUV':
+        i = 2
+        color_channel = cv2.cvtColor(src,cv2.COLOR_RGB2YUV)
+        sub_img = color_channel[:,:,i]
+    elif color_space == 'LUV':
+        i = 0 
+        color_channel = cv2.cvtColor(src,cv2.COLOR_RGB2LUV)
+        sub_img = color_channel[:,:,i]
+        sub_img = sobel_thres_gray(sub_img)
+    elif color_space == 'LAB':
+        i = 2 
+        color_channel = cv2.cvtColor(src,cv2.COLOR_RGB2LAB)
+        sub_img = color_channel[:,:,i]
+    else:
+        i = 0
+        color_channel = cv2.cvtColor(src,channel)
+        sub_img = color_channel[:,:,i]
+        sub_img = sobel_thres_gray(sub_img)
+
+
+    output_image = np.zeros_like(sub_img)
+    output_image[(sub_img > thres[0]) & (sub_img <= thres[1])] = 1
+    return output_image
 
 
 # this function defines the pipeline used to binary image
@@ -174,15 +257,29 @@ def all_combinations(src,grad_thres=(50,120),color_thres=(50,255),kernel=9):
     sobelx_S = sobel_thres(src,'x',grad_thres,'S',kernel)
     sobely_S = sobel_thres(src,'y',grad_thres,'S',kernel)
     sobel_mag_S = sobel_thres_magnitude(src,grad_thres,'S',kernel)
-    color_channel = color_spaces(src,'S',color_thres)
+    color_channel = color_spaces(src,'HLS',color_thres)
+    color_yuv = region_of_interest(color_spaces(src,'YUV',(0,110)))  # Identify Yellow color
+    color_lab = region_of_interest(color_spaces(src,'LAB',(150,255))) # Identify Yellow color
+    color_white = white_filter(src) #Identify White color
+    
+
+    yellow = np.zeros_like(sobelx_gray)
+    yellow_white = np.zeros_like(sobelx_gray)
     combined_binary = np.zeros_like(sobelx_gray)
+    final_image = np.zeros_like(sobelx_gray)
+    
+    yellow[((color_yuv == 1) & (color_lab == 1))] = 1
+    yellow_white[((color_white == 1) | (yellow == 1))] = 1
+    
     combined_binary[((sobelx_gray == 1) & (sobely_gray == 1)) | 
                     ((sobelx_S == 1) & (sobely_S == 1)) | 
                     ((sobel_mag_S == 1) & (color_channel == 1)) |
                     ((sobel_mag_gray == 1) & (color_channel == 1))] = 1
-    return combined_binary
     
-
+    combined_binary = region_of_interest(combined_binary)
+    final_image[(combined_binary == 1) | (yellow_white == 1)] = 1
+    
+    return final_image
 
 
 #vizualize each step of pipeline
@@ -236,7 +333,6 @@ def visualize_pipeline(src,grad_thres=(50,120),color_thres=(50,255),kernel=9):
     ax12.imshow(binary_warped, cmap='gray')
     ax12.set_title('Perspective Transform: Binary Image', fontsize=15)
     plt.subplots_adjust(left=0., right=1, top=0.9, bottom=0.)
-
 
 
 #For given Binary image,Returns X axis and y axis Pixel positions of left line and right line
@@ -307,15 +403,19 @@ def get_pixelpositions_withSlidigWindow(binary_warped):
     
 
 
-
 #given image, polymonial fit coefficients of previous left and right lane
 #identifies the current image x and y values of left and right lane
 #Assumption  is that, Lane Lines will not change its position significantly from last frame
-def get_pixelpositions_withPreviousLinefits(binary_warped,left_fit,right_fit):
+def get_pixelpositions_withPreviousLinefits(binary_warped,left_fitx,right_fitx):
     nonzero = binary_warped.nonzero()
     nonzeroy = np.array(nonzero[0])
     nonzerox = np.array(nonzero[1])
-    margin = np.int(binary_warped.shape[1] * 0.075) # margin with in which to check for lane lines instead of whole image
+    margin = np.int(binary_warped.shape[1] * 0.075)  # margin with in which to check for lane lines instead of whole image
+    
+    ploty = np.linspace(0, binary_warped.shape[0]-1, binary_warped.shape[0] )
+    left_fit = np.polyfit(ploty, left_fitx, 2)
+    right_fit = np.polyfit(ploty, right_fitx, 2)
+    
     left_lane_inds = ((nonzerox > (left_fit[0]*(nonzeroy**2) + left_fit[1]*nonzeroy + left_fit[2] - margin)) & (nonzerox < (left_fit[0]*(nonzeroy**2) + left_fit[1]*nonzeroy + left_fit[2] + margin))) 
     right_lane_inds = ((nonzerox > (right_fit[0]*(nonzeroy**2) + right_fit[1]*nonzeroy + right_fit[2] - margin)) & (nonzerox < (right_fit[0]*(nonzeroy**2) + right_fit[1]*nonzeroy + right_fit[2] + margin)))  
 
@@ -327,8 +427,8 @@ def get_pixelpositions_withPreviousLinefits(binary_warped,left_fit,right_fit):
     return leftx,lefty,rightx,righty
 
 
-
 #Visualization of sliding window
+
 def viz_sliding_windows(nonzeroy,nonzerox,left_lane_inds,right_lane_inds):
     
     out_img[nonzeroy[left_lane_inds], nonzerox[left_lane_inds]] = [255, 0, 0]
@@ -338,7 +438,6 @@ def viz_sliding_windows(nonzeroy,nonzerox,left_lane_inds,right_lane_inds):
     plt.plot(right_fitx, ploty, color='yellow')
     plt.xlim(0, binary_warped.shape[1])
     plt.ylim(binary_warped.shape[0], 0)
-
 
 
 #Curvature Calculation
@@ -375,7 +474,6 @@ def get_curve_offset(binary_warped,lefty,leftx,righty,rightx):
     return curve,position
 
 
-
 #Draws the final output image stitched in video
 #Takes input image, binary warped image, left and right lane x-axis positions
 #Minv for calculating back original image from warped image
@@ -407,6 +505,22 @@ def draw_output_image(inputImage,binary_warped,left_fitx,right_fitx,Minv,curve,p
     return result
 
 
+#Sanity Check
+# For currentline x-axis pixel positions, does basic sanity checks and returns boolean to accept or reject line
+def sanity_check(binary_warped,current_line,previous_line):
+    width = binary_warped.shape[1]
+    height = binary_warped.shape[0]
+    margin = np.int(width * 0.05)
+    top_diff = np.absolute(current_line[0] - previous_line[0])
+    bottom_diff = np.absolute(current_line[-1] - previous_line[-1])
+    middle_diff = np.absolute(current_line[np.int(height/2)] - previous_line[np.int(height/2)])
+    line_check_bottom = current_line[-1] >= 0.10 * width and current_line[-1] <= 0.95 * width
+    line_check_top = current_line[0] >= 0.10 * width and current_line[0] <= 0.95 * width
+    if(top_diff < margin and bottom_diff < margin and middle_diff < margin and line_check_bottom and line_check_top):
+        return True
+    else:
+        return False  
+
 
 #Function that takes input image and return output image
 # contains entire pipeline of processing
@@ -422,32 +536,80 @@ def draw_output_image(inputImage,binary_warped,left_fitx,right_fitx,Minv,curve,p
 def get_output_image(input_image):
     src = cal_undistort(input_image, mtx, dist)
     processed_binary_image = all_combinations(src,grad_thres,color_thres,kernel)
+
     binary_warped, Minv = perspective_transoform(processed_binary_image)
     
-    global previous_left_fit
-    global previous_right_fit
+    global previous_left_fitx
+    global previous_right_fitx
+    global previous_left_used_counter
+    global previous_right_used_counter
     
-    if len(previous_left_fit) > 0 and  len(previous_right_fit) > 0:
-        leftx,lefty,rightx,righty = get_pixelpositions_withPreviousLinefits(binary_warped,previous_left_fit,previous_right_fit)
+    SEARCH_FROM_SCRATH = False
+    
+    if len(previous_left_fitx) > 0 and  len(previous_right_fitx) > 0:
+        leftx,lefty,rightx,righty = get_pixelpositions_withPreviousLinefits(binary_warped,previous_left_fitx,previous_right_fitx)
     else:   
         leftx,lefty,rightx,righty = get_pixelpositions_withSlidigWindow(binary_warped)
-
+    
     # Fit a second order polynomial to each
     left_fit = np.polyfit(lefty, leftx, 2)
     right_fit = np.polyfit(righty, rightx, 2)
     
-    previous_left_fit = left_fit     # use left fit in next frame
-    previous_right_fit = right_fit   # use right fit in next frame 
 
     # Generate x and y values for plotting
     ploty = np.linspace(0, binary_warped.shape[0]-1, binary_warped.shape[0] )
     left_fitx = left_fit[0]*ploty**2 + left_fit[1]*ploty + left_fit[2]
     right_fitx = right_fit[0]*ploty**2 + right_fit[1]*ploty + right_fit[2]
-
+    
+    accept_left = True
+    accept_right = True
+    
+    #Sanity Check
+    if len(previous_left_fitx) > 0:
+        temp_leftx = 0.6 * left_fitx + 0.4 * previous_left_fitx   #exponential Decay
+        accept_left = sanity_check(binary_warped,temp_leftx,previous_left_fitx)
+        if(accept_left):
+            use_leftx = temp_leftx
+            previous_left_used_counter = 0
+        else:
+            use_leftx = previous_left_fitx
+            previous_left_used_counter = previous_left_used_counter + 1
+            if(previous_left_used_counter > 7):
+                #print('Left Lane used Last ', previous_left_used_counter,' times')
+                SEARCH_FROM_SCRATH = True
+    else:
+        use_leftx = left_fitx
+        previous_left_used_counter = 0
+        
+        
+        
+    if len(previous_right_fitx) > 0:    
+        temp_rightx = 0.6 * right_fitx + 0.4 * previous_right_fitx
+        accept_right = sanity_check(binary_warped,temp_rightx,previous_right_fitx)  
+        if(accept_right):
+            use_rightx = temp_rightx
+            previous_right_used_counter = 0
+        else:
+            use_rightx = previous_right_fitx
+            previous_right_used_counter = previous_right_used_counter + 1
+            if(previous_right_used_counter > 7):
+                #print('Right Lane used Last ', previous_right_used_counter,' times')
+                SEARCH_FROM_SCRATH = True
+    else:
+        use_rightx = right_fitx
+        previous_right_used_counter = 0
+        
     curve,position = get_curve_offset(binary_warped,lefty,leftx,righty,rightx)
     output_image = draw_output_image(src,binary_warped,left_fitx,right_fitx,Minv,curve,position)
+    
+    if SEARCH_FROM_SCRATH:
+        previous_left_fitx = []    # use Sliding Window next frame
+        previous_right_fitx = []   # use Sliding Window next frame
+    else: 
+        previous_left_fitx = use_leftx     # use left fit in next frame
+        previous_right_fitx = use_rightx   # use right fit in next frame
+    
     return output_image
-
 
 
 
@@ -465,12 +627,14 @@ kernel=5
 ym_per_pix = None   #Y-axis image to meter conversion value
 xm_per_pix = None   #X-axis image to meter conversion value
 
-previous_left_fit = []   # polynomial fit coefficients of previous left lane
-previous_right_fit = []  # polynomial fit coefficients of previous Right lane
+previous_left_fitx = []  # X axis pixels of previous left lane
+previous_right_fitx = [] # X axis pixels of previous Right lane
+
+previous_left_used_counter = 0  # counter to keep track of skipped left lanes
+previous_right_used_counter = 0 # counter to keep track of skipped right lanes
 
 
-white_output = 'data/test_videos_output/project_video.mp4'
+white_output = 'data/output_videos/project_video_attempt2.mp4'
 clip1 = VideoFileClip("data/test_videos/project_video.mp4")
 white_clip = clip1.fl_image(get_output_image) #NOTE: this function expects color images!!
 get_ipython().magic('time white_clip.write_videofile(white_output, audio=False)')
-

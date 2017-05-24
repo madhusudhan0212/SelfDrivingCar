@@ -18,6 +18,7 @@ The goals / steps of this project are the following:
 [image1]: ./data/pipeline_images/cameraCalibration.jpg "Camera Calibration"
 [image2]: ./data/pipeline_images/undist_Input.jpg "Input Image"
 [image3]: ./data/pipeline_images/pipeline.jpg "Pipeline Images"
+[image8]: ./data/pipeline_images/whiteYellow.jpg "Yellow and White Images"
 [image4]: ./data/pipeline_images/binaryOutput.jpg "Binary Output"
 [image5]: ./data/pipeline_images/perspective_transform.jpg "Perspective Transform"
 [image6]: ./data/pipeline_images/polynomialFits.jpg "Polynomial Fits"
@@ -48,7 +49,7 @@ I then used the output `objpoints` and `imgpoints` to compute the camera calibra
 
 #### 2. Data Pipeline
 
-I used a combination of color and gradient thresholds to generate a binary image (function `all_combinations()`, which appears in lines 170 through 183 in the file `AdvancedLaneFinding.py`).  Below steps explain various steps of pipeline
+I used a combination of color and gradient thresholds to generate a binary image (function `all_combinations()`, which appears in lines 253 through 282 in the file `AdvancedLaneFinding.py`).  Below steps explain various steps of pipeline
 
     * calculate Sobel Gradient for X-axis, Y-axis, X and Y Magnitude on Gray Image
     * calculate Sobel Gradient for X-axis, Y-axis, X and Y Magnitude on S channel Image of HLS
@@ -57,17 +58,24 @@ I used a combination of color and gradient thresholds to generate a binary image
     * Img2 : S channel X-axis and Y-axis combined
     * Img3 : Color Channel and Gray Magnitude combined
     * Img4 : Color Channel and S channel Magnitude combined  
-    * Final Binary Image: OR combination of (Img1,Img2,Img3,Img4) 
+    * Binary Image I: OR combination of (Img1,Img2,Img3,Img4)
+    * Img5 : White color in Region of Interest
+    * Img6 : V channel of YUV that identify Yellow color in region of interest
+    * Img7 : OR combination of Img5 and Img6
+    * Final Binary Image: OR combination of (Binary Image I,Img7) 
 
 Below Image shows various pipeline images of Input image
 ![alt text][image3]
 
-The final Binary image will look like this
+Below Image shows images of White and Yellow lines
+![alt text][image8]
+
+The FInal Binary image will look like this
 ![alt text][image4]
 
 #### 3. Perspective Transform
 
-The code for my perspective transform includes a function called `perspective_transoform()`, which appears in lines 127 through 152 in the file `AdvancedLaneFinding.py`.  The `perspective_transoform()` function takes as inputs an image and gives warped output.   I chose to hardcode the source and destination points in the following manner:
+The code for my perspective transform includes a function called `perspective_transoform()`, which appears in lines 169 through 184 in the file `AdvancedLaneFinding.py`.  The `perspective_transoform()` function takes as inputs an image and gives warped output.   I chose to hardcode the source and destination points in the following manner:
 
 ```python
 img_height = image.shape[0]
@@ -75,10 +83,10 @@ img_width = image.shape[1]
 img_size = (image.shape[1], image.shape[0])
 
 offset = np.int(img_height * 0.075)
-src = np.float32([[np.int(img_width * 0.10 ),np.int(img_height * 0.90)],
+src = np.float32([[np.int(img_width * 0.10 ),np.int(img_height * 0.97)],
                     [np.int(img_width * 0.40 ),np.int(img_height * 0.65 )],
                     [np.int(img_width * 0.60 ),np.int(img_height * 0.65 )],
-                    [ np.int(img_width * 0.90 ),np.int(img_height * 0.90)]])
+                    [ np.int(img_width * 0.90 ),np.int(img_height * 0.97)]])
 dst = np.float32([[offset, img_size[1]-offset],
     			[offset, offset], 
     			[img_size[0]-offset, offset],
@@ -89,10 +97,10 @@ This resulted in the following source and destination points:
 
 | Source        | Destination   | 
 |:-------------:|:-------------:| 
-| 128, 648      | 54, 666       | 
+| 128, 698      | 54, 666       | 
 | 512, 468      | 54, 54      	|
 | 768, 468     	| 1226, 54      |
-| 1152, 648     | 1226, 666     |
+| 1152, 698     | 1226, 666     |
 
 I verified that my perspective transform was working as expected by drawing a test image and its warped counterpart to verify that the lines appear parallel in the warped image.
 
@@ -100,18 +108,25 @@ I verified that my perspective transform was working as expected by drawing a te
 
 #### 4. Identify lane-line pixels
 
-I did this in functions `get_pixelpositions_withSlidigWindow()` and `get_pixelpositions_withPreviousLinefits()` in lines 244 through 327 in my code in `AdvancedLaneFinding.py`. The first method used sliding windows approach to identify lane lines. The second method takes in previous frame's predicted lines and narrows its search area to find lane lines in new frame. Both functions return identify and return current image's x and y pixel positions of left and right lane.
+I did this in functions `get_pixelpositions_withSlidigWindow()` and `get_pixelpositions_withPreviousLinefits()` in lines 340 through 427 in my code in `AdvancedLaneFinding.py`. The first method used sliding windows approach to identify lane lines. The second method takes in previous frame's predicted lines and narrows its search area to find lane lines in new frame. Both functions return identify and return current image's x and y pixel positions of left and right lane.
 The pixel points are then used to fit lane lines with 2nd order polynomial. Below image shows the sliding window approach used and lane lines pixels identified and fit lines
+
+Then both left and right lines are then subjected to sanity checks. 
+* The previous predicted line and current predicted line are with in close margin
+* The predicted line is not in unexpected areas
+
+If the sanity check fails then predictions from previous frames are used.
+If sanity check fails continuosly for more than 7 frames then lanes are identified from scrath using sliding window.
 
 ![alt text][image6]
 
 #### 5. Radius of curvature of the lane and the position of the vehicle with respect to center.
 
-I did this in function `get_curve_offset()` in lines 348 through 375 in my code in `AdvancedLaneFinding.py`. To identify vehicl position with respect to center, I calculated lane center and image center in meters and did subraction. For radius curvature, i identified the curvature for both left and right lanes and used minimum of both to display on output image.
+I did this in function `get_curve_offset()` in lines 447 through 474 in my code in `AdvancedLaneFinding.py`. To identify vehicl position with respect to center, I calculated lane center and image center in meters and did subraction. For radius curvature, i identified the curvature for both left and right lanes and used minimum of both to display on output image.
 
 #### 6. final output
 
-I implemented this step in function `draw_output_image()` in lines 383 through 407 in my code in `AdvancedLaneFinding.py`.  In this step, i warped the detected lane boundaries back onto the original image and added position and curvature strings back onto original image
+I implemented this step in function `draw_output_image()` in lines 481 through 505 in my code in `AdvancedLaneFinding.py`.  In this step, i warped the detected lane boundaries back onto the original image and added position and curvature strings back onto original image
 
 Here is an example of my result on a test image:
 
@@ -123,7 +138,7 @@ Here is an example of my result on a test image:
 
 #### 1. Below is the link to my output video. It works reasonably well in identifying lane lines
 
-Here's a [link to my video result](./data/output_videos/project_video.mp4)
+Here's a [link to my video result](./data/output_videos/project_video_attempt2.mp4)
 
 ---
 
