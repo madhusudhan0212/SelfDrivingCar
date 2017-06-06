@@ -46,11 +46,11 @@ Not Vehicle
 
 * I then explored different color spaces and different `skimage.hog()` parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`).  After some iterations with different values for color space, orientation, pixels_per_cell and cells_per_block, i found that i was getting best test accuracy of model consistently when i used below values for the parameters.
 
-`YCrCb` color space , `orientations=8`, `pixels_per_cell=(8, 8)` and `cells_per_block=(2, 2)`:
+`YCrCb` color space , `orientations=9`, `pixels_per_cell=(8, 8)` and `cells_per_block=(2, 2)`:
 
 
 * I have also resized the image to `(32,32)` and ravel the image to get all pixel values as features (Ipython cell 2)
-* I have also used color transform to `YCrCb` and extracted histograms of `32 bins` for each color channel (Ipython cell 3)
+* I have also used color transform to `YCrCb` and extracted histograms of `64 bins` for each color channel (Ipython cell 3)
 * I then combined all three ( hog features, pixel value features and color histogram features) to get the final features (total feature vecotr length: 8556)
 * Now i normalized the features using StandardScaler and randomly selected 20% of data aside for testing the model (Ipython cell 12 and 13)
 * I trained a linear SVM using lower C value (0.1) for higher margin Hyper plane. I chose linear SVM because of its speed compared to SVM with linear kernel. I got a test accuracy of 98.94 % (Ipython cell 14 and 15)
@@ -89,7 +89,29 @@ Below image shows the final output image with vehicles identified. Note that fal
 ![alt text][image6]
 
 
-The Ipython cell 10 shows the list of all the parameters used for the pipeline. Additional test images, corresponding hog images, pipeline images and output images can be found in data folder of the repository
+Below are the list of all the parameters used for the pipeline. 
+
+| Parameter             | Value         | 
+|:---------------------:|:-------------:| 
+| color_space      		| 'YCrCb'       | 
+| orient      			| 9      		|
+| pix_per_cell    	 	| 8      		|
+| cell_per_block        | 2    		    |
+| cells_per_step        | 2   		    |
+| hog_channel     	    | 'ALL'         |
+| scale      			| [0.9,1.5,1.9] | 
+| spatial_size    	    | (32, 32)     	|
+| hist_bins     		| 64            |
+| min_pixel_width     	| 48    		|
+| min_pixel_height      | 48    	    |
+| smoothing_over_frames | 30   	   	    |
+| threshold   		    | 18   		    |
+| spatial_feat   		| True   		|
+| hist_feat   		    | True   	    |
+| hog_feat   		    | True   	    |
+
+
+Additional test images, corresponding hog images, pipeline images and output images can be found in data folder of the repository
 
 
 ### Video Implementation
