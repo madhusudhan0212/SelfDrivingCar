@@ -34,7 +34,7 @@ The first step of this project is to prepare labeled data from vehicle and non-v
 
 ####1. HOG features extraction from the training images.
 
-The code for this step is contained in the 7 and 11 code cells of the IPython notebook (or in lines # through # of the file called `some_file.py`).  
+The code for this step is contained in the 7 and 11 code cells of the IPython notebook.  
 
 I started by reading in all the `vehicle` and `non-vehicle` images.  Here is an example of one of each of the `vehicle` and `non-vehicle` classes:
 
@@ -44,17 +44,16 @@ Vehicle
 Not Vehicle
 ![alt text][image2]
 
-I then explored different color spaces and different `skimage.hog()` parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`).  After some iterations with different values for color space, orientation, pixels_per_cell and cells_per_block, i found that i was getting best test accuracy of model consistently when i used below values for the parameters.
+* I then explored different color spaces and different `skimage.hog()` parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`).  After some iterations with different values for color space, orientation, pixels_per_cell and cells_per_block, i found that i was getting best test accuracy of model consistently when i used below values for the parameters.
 
 `YCrCb` color space , `orientations=8`, `pixels_per_cell=(8, 8)` and `cells_per_block=(2, 2)`:
 
 
-I have also resized the image to `(32,32)` and ravel the image to get all pixel values as features (Ipython cell 2)
-I have also used color transform to YCrCb and extracted histograms of `32 bins` for each color channel (Ipython cell 3)
-I then combined all three ( hog features, pixel value features and color histogram features) to get the final features (total 8556)
-
-Now i normalized the features using StandardScaler and randomly selected 20% of data aside for testing the model (Ipython cell 12 and 13)
-I trained a linear SVM using lower C value (0.1) for higher margin Hyper plane. I chose linear SVM because of its speed compared to SVM with linear kernel. I got a test accuracy of 98.94 % (Ipython cell 14 and 15)
+* I have also resized the image to `(32,32)` and ravel the image to get all pixel values as features (Ipython cell 2)
+* I have also used color transform to `YCrCb` and extracted histograms of `32 bins` for each color channel (Ipython cell 3)
+* I then combined all three ( hog features, pixel value features and color histogram features) to get the final features (total feature vecotr length: 8556)
+* Now i normalized the features using StandardScaler and randomly selected 20% of data aside for testing the model (Ipython cell 12 and 13)
+* I trained a linear SVM using lower C value (0.1) for higher margin Hyper plane. I chose linear SVM because of its speed compared to SVM with linear kernel. I got a test accuracy of 98.94 % (Ipython cell 14 and 15)
 
 ---
 ### Detecting vehicles in video stream
@@ -67,18 +66,15 @@ Here i will show how to identify vehicles in new images. lets find how our model
 
 ###Sliding Window Search
 
-####1. Describe how (and identify where in your code) you implemented a sliding window search.  How did you decide what scales to search and how much to overlap windows?
+The method i used to identify vehicles quickly in new images is Sliding Window Search. In this method, you select the region of interest of your image (part of image where you expect to find vehicles, usually the bottom half of the image) and perform Hog feature extraction only once for each color channel with parameter feature_vec=False. Now you use sliding window approach to check each window for vehicle detection by extracting hog features, pixel features and color histogram features for that particular window. The major advantage of Sliding Window Search is that you calculate Hog features only once for each channel.
 
-The method i used to identify vehicles quickly in new images is Sliding Window Search. In this method, you select the region of interest of your image (part of image where you expect to find vehicles, usually the bottom half of the image) and perform Hog feature extraction only once for each color channel with parameter feature_vec=False. Now you use sliding window approach to check each window for vehicle by extracting hog features, pixel features and color histogram features for that particular window. The major advantage of Sliding Window Search is that you calculate Hog features only once for each channel.
+I used 3 different scales `[0.9,1.5,1.9]` with `2` cells_per_step (defines the cells to step during sliding window search). These scale values are used to appropriately scale the input image and then perform sliding window search on the scaled image. I have arrived at these scale values after using different scale values on test images and observing the output.
 
-I used 3 different scales `[0.9,1.5,1.9]` with `2` cells_per_step (how many cells to step during sliding window search). These scale values are used to appropriately scale the input image and then perform sliding window search on the scaled image. I have arrived at these scale values after using different scale values on test images and observing the output.
-
-The code for this step in Ipython cells 6 and 16.
+The code for this step is in Ipython cells 6 and 16.
 
 Below image shows the HOG features in the region of interest for each channel of the input image
 
 ![alt text][image4]
-
 
 after sliding window search, you will get list of positions of positive detections where vehicles are expected for each scale. I then created a heatmap from all the positive detections. Below image shows positive detections for each scale and heatmap image
 
@@ -98,9 +94,9 @@ The Ipython cell 10 shows the list of all the parameters used for the pipeline. 
 
 ### Video Implementation
 
-Each frame of the video is an image and i performed all the above steps to each of the image. Below are the few optimization techniques i used.
+Each frame of the video is an image and i performed all the above steps to each of the image. Below are the few additional optimization techniques i used on video stream.
 
-* I stored the bounding boxes of last 30 frames and used each time i used all of them to generate heatmap
+* I stored the bounding boxes of last 30 frames and each time i used all of them to generate heatmap
 * I then used a threshold of 18 to filter out any false positives
 * As an additional layer to filter out any false positives, i check the width and height of each final bounding box constructed from the heatmap and check if the width and height values are in expected range.
 
